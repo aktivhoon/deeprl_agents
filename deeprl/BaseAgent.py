@@ -1,20 +1,11 @@
 # Base Agent
 
 import numpy as np
-import copy
-from collections import namedtuple
-from itertools import count
-import math
 import os
-import time
-import random
-
-import gym
 
 from .memory import ReplayMemory
 
 import torch
-import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 
 class BaseAgent:
@@ -54,17 +45,15 @@ class BaseAgent:
 
     def select_action(self):
         """
-            The agent selects the action using this function.
+        The agent selects the action using this function.
         """
         return
-
 
     def inner_loop(self):
         """
-            Inner loop for optimization
+        Inner loop for optimization.
         """
         return
-
 
     def get_state(self, obs):
         state = np.array(obs)
@@ -74,13 +63,12 @@ class BaseAgent:
 
     def train(self, render = False):
         """
-            Trains the Q-network
+        Trains the Q-network.
         """
         return
 
-    
     def test(self, render = True):
         """
-            Test the Q-network
+        Tests the Q-network.
         """
         return

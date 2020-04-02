@@ -1,21 +1,16 @@
-import numpy as np
-import copy
 from collections import namedtuple
 from itertools import count
 import math
-import os
 import time
 import random
 
 import gym
 
-from .memory import ReplayMemory
 from .BaseAgent import BaseAgent
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.tensorboard import SummaryWriter
 
 Transition = namedtuple('Transion',
                         ('state', 'action', 'next_state', 'reward'))
@@ -153,20 +148,21 @@ class DQNAgent(BaseAgent):
         return
     
     def test(self, render = True):
-        self.env = gym.wrappers.Monitor(self.env, self.save_path + 'videos/' + 'final_video', video_callable = lambda episode_id: True, force = True)
+        self.env = gym.wrappers.Monitor(self.env, self.save_path + 'videos/' + 'final_video', 
+                                        video_callable = lambda episode_id: True, force = True)
         for episode in range(1):
             obs = self.env.reset()
             state = self.get_state(obs)
             self.total_reward = 0.0
 
-            for t in count():
+            for _ in count():
                 action = self.policy_net(state.to('cuda')).max(1)[1].view(1, 1)
 
                 if render:
                     self.env.render()
                     time.sleep(0.02)
 
-                obs, reward, done, info = self.env.step(action)
+                obs, reward, done, _ = self.env.step(action)
 
                 self.total_reward += reward
 
@@ -178,7 +174,7 @@ class DQNAgent(BaseAgent):
                 state = next_state
 
                 if done:
-                    print("Finished Episode {} with reward {}".format(episode, total_reward))
+                    print("Finished Episode {} with reward {}".format(episode, self.total_reward))
                     break
 
         self.env.close()

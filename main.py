@@ -2,14 +2,7 @@
 # Codes were based on https://github.com/jmichaux/dqn-pytorch.git
 
 import argparse
-import numpy as np
-import copy
 from collections import namedtuple
-from itertools import count
-import math
-import os
-import time
-import random
 
 import gym
 
@@ -17,9 +10,6 @@ from wrappers import *
 from deeprl.DQNAgent import *
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
 
 Transition = namedtuple('Transion',
                         ('state', 'action', 'next_state', 'reward'))
@@ -42,7 +32,6 @@ if __name__ == '__main__':
     # set device
     torch_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    
     # create environment
     if args.game == 'pong':
         env = gym.make("PongNoFrameskip-v4")
@@ -56,6 +45,5 @@ if __name__ == '__main__':
 
     if args.mode == 'train':
         agent.train()
-        agent.test()
     elif args.mode == 'test':
         agent.test()
