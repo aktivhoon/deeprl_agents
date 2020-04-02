@@ -33,8 +33,7 @@ def arg_parse():
                         choices=['train', 'test'], required=False)
     parser.add_argument('--game', type=str, default='pong',
                         choices=['pong', 'breakout'], required=False)
-    parser.add_argument('--train', type=int, default=200000, required=False)
-    parser.add_argument('--n_dist', type=int, default=31, required=False)
+    parser.add_argument('--train', type=int, default=20000, required=False)
     return parser.parse_args()
 
 if __name__ == '__main__':
