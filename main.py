@@ -6,19 +6,18 @@ from collections import namedtuple
 
 import gym
 
-from wrappers import *
-from deeprl.DQNAgent import *
+from wrappers import make_env
+from env_utils import make_vec_envs
+from deeprl.DQNAgent import DQNAgent
 
 import torch
 
-Transition = namedtuple('Transion',
-                        ('state', 'action', 'next_state', 'reward'))
 
 def arg_parse():
     desc = "Deep RL Experiment"
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('--model', type=str, default='DQN',
-                        choices=['DQN'], required=True)
+                        choices=['DQN', 'A2C'], required=True)
     parser.add_argument('--mode', type=str, default='train',
                         choices=['train', 'test'], required=False)
     parser.add_argument('--game', type=str, default='pong',
