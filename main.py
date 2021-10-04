@@ -9,6 +9,7 @@ import gym
 from wrappers import make_env
 from env_utils import make_vec_envs
 from deeprl.DQNAgent import DQNAgent
+import utils
 
 import torch
 
