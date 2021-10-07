@@ -1,6 +1,6 @@
 # Check https://github.com/ikostrikov/pytorch-a2c-ppo-acktr-gail.git
 import torch
-from torch.utils.data.sample import BatchSampler, SubsetRandomSampler
+from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 
 
 def _flatten_helper(T, N, _tensor):
@@ -10,12 +10,12 @@ def _flatten_helper(T, N, _tensor):
 class RolloutStorage(object):
     def __init__(self, num_steps, num_processes, obs_shape, action_space, recurrent_hidden_state_size):
         self.obs = torch.zeros(num_steps + 1, num_processes, *obs_shape)
-        self.recurrent_hidden_state = torch.zeros(
-            num_steps + 1, num_proceeses, recurrent_hidden_state_size)
-        self.rewards = torch.zeros(num_stpes, num_processes, 1)
+        self.recurrent_hidden_states = torch.zeros(
+            num_steps + 1, num_processes, recurrent_hidden_state_size)
+        self.rewards = torch.zeros(num_steps, num_processes, 1)
         self.value_preds = torch.zeros(num_steps + 1, num_processes, 1)
         self.returns = torch.zeros(num_steps + 1, num_processes, 1)
-        self.actions_log_probs = torch.zeros(num_steps, num_processes, 1)
+        self.action_log_probs = torch.zeros(num_steps, num_processes, 1)
         if action_space.__class__.__name__ == 'Discrete':
             action_shape = 1
         else:
@@ -29,7 +29,7 @@ class RolloutStorage(object):
         # or time limit end state
         self.bad_masks = torch.ones(num_steps + 1, num_processes, 1)
 
-        self.num_stpes = num_steps
+        self.num_steps = num_steps
         self.step = 0
 
     def to(self, device):
@@ -65,44 +65,19 @@ class RolloutStorage(object):
 
     def compute_returns(self,
                         next_value,
-                        use_gae,
                         gamma,
-                        gae_lambda,
                         use_proper_time_limits=True):
         if use_proper_time_limits:
-            if use_gae:
-                self.value_preds[-1] = next_value
-                gae = 0
-                for step in reversed(range(self.rewards.size(0))):
-                    delta = self.rewards[step] + gamma * self.value_preds[
-                        step + 1] * self.masks[step +
-                                               1] - self.value_preds[step]
-                    gae = delta + gamma * gae_lambda * self.masks[step +
-                                                                  1] * gae
-                    gae = gae * self.bad_masks[step + 1]
-                    self.returns[step] = gae + self.value_preds[step]
-            else:
-                self.returns[-1] = next_value
-                for step in reversed(range(self.rewards.size(0))):
-                    self.returns[step] = (self.returns[step + 1] * \
-                        gamma * self.masks[step + 1] + self.rewards[step]) * self.bad_masks[step + 1] \
-                        + (1 - self.bad_masks[step + 1]) * self.value_preds[step]
+            self.returns[-1] = next_value
+            for step in reversed(range(self.rewards.size(0))):
+                self.returns[step] = (self.returns[step + 1] * \
+                    gamma * self.masks[step + 1] + self.rewards[step]) * self.bad_masks[step + 1] \
+                    + (1 - self.bad_masks[step + 1]) * self.value_preds[step]
         else:
-            if use_gae:
-                self.value_preds[-1] = next_value
-                gae = 0
-                for step in reversed(range(self.rewards.size(0))):
-                    delta = self.rewards[step] + gamma * self.value_preds[
-                        step + 1] * self.masks[step +
-                                               1] - self.value_preds[step]
-                    gae = delta + gamma * gae_lambda * self.masks[step +
-                                                                  1] * gae
-                    self.returns[step] = gae + self.value_preds[step]
-            else:
-                self.returns[-1] = next_value
-                for step in reversed(range(self.rewards.size(0))):
-                    self.returns[step] = self.returns[step + 1] * \
-                        gamma * self.masks[step + 1] + self.rewards[step]
+            self.returns[-1] = next_value
+            for step in reversed(range(self.rewards.size(0))):
+                self.returns[step] = self.returns[step + 1] * \
+                    gamma * self.masks[step + 1] + self.rewards[step]
 
     def feed_forward_generator(self,
                                advantages,

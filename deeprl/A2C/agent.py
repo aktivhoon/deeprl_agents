@@ -11,8 +11,7 @@ class A2C_Agent():
                  lr=None,
                  eps=None,
                  alpha=None,
-                 max_grad_norm=None,
-                 acktr=False):
+                 max_grad_norm=None):
 
         self.actor_critic = actor_critic
 
@@ -48,8 +47,7 @@ class A2C_Agent():
         (value_loss * self.value_loss_coef + action_loss -
          dist_entropy * self.entropy_coef).backward()
 
-        if self.acktr == False:
-            nn.utils.clip_grad_norm_(self.actor_critic.parameters(),
+        nn.utils.clip_grad_norm_(self.actor_critic.parameters(),
                                      self.max_grad_norm)
 
         self.optimizer.step()
